@@ -543,8 +543,9 @@
             @elseif (request()->routeIs('admin.user_management.user.change_password')) active
             @elseif (request()->routeIs('admin.user_management.subscribers')) active
             @elseif (request()->routeIs('admin.user_management.mail_for_subscribers')) active
-            @elseif (request()->routeIs('admin.user_management.push_notification.settings')) active
-            @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) active @endif">
+           @elseif (request()->routeIs('admin.bulk_email.*')) active
+           @elseif (request()->routeIs('admin.user_management.push_notification.settings')) active
+           @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) active @endif">
                         <a data-toggle="collapse" href="#user">
                             <i class="la flaticon-users"></i>
                             <p>{{ __('Users Management') }}</p>
@@ -559,6 +560,7 @@
               @elseif (request()->routeIs('admin.user_management.user.change_password')) show
               @elseif (request()->routeIs('admin.user_management.subscribers')) show
               @elseif (request()->routeIs('admin.user_management.mail_for_subscribers')) show
+              @elseif (request()->routeIs('admin.bulk_email.*')) show
               @elseif (request()->routeIs('admin.user_management.push_notification.settings')) show
               @elseif (request()->routeIs('admin.user_management.push_notification.notification_for_visitors')) show @endif">
                             <ul class="nav nav-collapse">
@@ -585,6 +587,12 @@ active @endif
                   @elseif (request()->routeIs('admin.user_management.mail_for_subscribers')) active @endif">
                                     <a href="{{ route('admin.user_management.subscribers') }}">
                                         <span class="sub-item">{{ __('Subscribers') }}</span>
+                                    </a>
+                                </li>
+
+                                <li class="{{ request()->routeIs('admin.bulk_email.*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.bulk_email.index') }}">
+                                        <span class="sub-item">{{ __('Bulk Email') }}</span>
                                     </a>
                                 </li>
 

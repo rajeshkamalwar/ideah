@@ -447,6 +447,14 @@ Route::prefix('/admin')->middleware('auth:admin', 'Demo', 'adminLang')->group(fu
 
         Route::post('/subscribers/send-email', 'Admin\User\SubscriberController@prepareEmail')->name('admin.user_management.subscribers.send_email');
 
+        // bulk email routes
+        Route::get('/bulk-email', 'Admin\BulkEmailController@index')->name('admin.bulk_email.index');
+        Route::get('/bulk-email/compose', 'Admin\BulkEmailController@compose')->name('admin.bulk_email.compose');
+        Route::get('/bulk-email/recipients', 'Admin\BulkEmailController@recipients')->name('admin.bulk_email.recipients');
+        Route::post('/bulk-email/send', 'Admin\BulkEmailController@send')->name('admin.bulk_email.send');
+        Route::post('/bulk-email/schedule', 'Admin\BulkEmailController@schedule')->name('admin.bulk_email.schedule');
+        Route::post('/bulk-email/{id}/delete', 'Admin\BulkEmailController@destroy')->name('admin.bulk_email.destroy');
+
         // push notification route
         Route::prefix('/push-notification')->group(function () {
             Route::get('/settings', 'Admin\User\PushNotificationController@settings')->name('admin.user_management.push_notification.settings');
