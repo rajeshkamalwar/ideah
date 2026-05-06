@@ -306,6 +306,7 @@ Route::prefix('/admin')->middleware('auth:admin', 'Demo', 'adminLang')->group(fu
     //Show message
     Route::get('/listing-messages', 'Admin\MessageController@index')->name('admin.listing.messages');
     Route::post('/listing-message/delete', 'Admin\MessageController@delete')->name('admin.listing.message.delete_message');
+    Route::post('/listing-message/notify-vendor', 'Admin\MessageController@notifyListingVendor')->name('admin.listing.message.notify_vendor');
 
     Route::post('listing-bulk-delete', 'Admin\MessageController@bulkDelete')->name('admin.listing.message.bulk_delete.message');
 
@@ -314,6 +315,7 @@ Route::prefix('/admin')->middleware('auth:admin', 'Demo', 'adminLang')->group(fu
     Route::get('product/message/{id}/details', 'Admin\MessageController@showMessageDetails')
         ->name('admin.product.message.details');
     Route::post('/product-message/delete', 'Admin\MessageController@productDelete')->name('admin.product.message.delete_message');
+    Route::post('/product-message/notify-vendor', 'Admin\MessageController@notifyProductVendor')->name('admin.product.message.notify_vendor');
 
     Route::post('product-bulk-delete', 'Admin\MessageController@productBulkDelete')->name('admin.product.message.bulk_delete.message');
     //End Message
@@ -954,6 +956,8 @@ Route::prefix('/admin')->middleware('auth:admin', 'Demo', 'adminLang')->group(fu
         Route::get('/mail-to-admin', 'Admin\BasicSettings\BasicController@mailToAdmin')->name('admin.basic_settings.mail_to_admin');
 
         Route::post('/update-mail-to-admin', 'Admin\BasicSettings\BasicController@updateMailToAdmin')->name('admin.basic_settings.update_mail_to_admin');
+
+        Route::post('/test-mail-to-admin', 'Admin\BasicSettings\BasicController@testMailToAdmin')->name('admin.basic_settings.test_mail_to_admin');
 
         Route::get('/mail-templates', 'Admin\BasicSettings\MailTemplateController@index')->name('admin.basic_settings.mail_templates');
 

@@ -826,6 +826,10 @@ class ListingController extends Controller
                     ]
                 ])->pluck('address')->first();
 
+                $information['listingVendor'] = ((int) $vendorId !== 0)
+                    ? Vendor::query()->select('id', 'username', 'email')->find($vendorId)
+                    : null;
+
                 return view('admin.listing.edit', $information);
             } else {
 
@@ -844,6 +848,10 @@ class ListingController extends Controller
                     $id
                 ]
             ])->pluck('address')->first();
+
+            $information['listingVendor'] = ((int) $vendorId !== 0)
+                ? Vendor::query()->select('id', 'username', 'email')->find($vendorId)
+                : null;
 
             return view('admin.listing.edit', $information);
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\FrontEnd;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\AdminNotificationEmails;
 use App\Http\Helpers\GeoSearch;
 use App\Http\Helpers\ListingVisibility;
 use App\Http\Helpers\UploadFile;
@@ -1639,7 +1640,7 @@ class ListingController extends Controller
       }
       try {
         $data = [
-          'to' => $send_email_address,
+          'to' => AdminNotificationEmails::parseList($send_email_address),
           'subject' => $subject,
           'body' => $body,
         ];
@@ -1872,7 +1873,7 @@ class ListingController extends Controller
 
       try {
         Mail::send([], [], function ($message) use ($send_email_address, $body, $be, $product_title) {
-          $message->to($send_email_address)
+          $message->to(AdminNotificationEmails::parseList($send_email_address))
             ->subject('Inquiry about ' . $product_title)
             ->from($be->from_mail, $be->from_name)
             ->html($body);

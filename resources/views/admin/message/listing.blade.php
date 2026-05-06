@@ -75,6 +75,8 @@
                                 ['listing_id', $message->listing_id],
                                 ['language_id', $language->id],
                             ])->first();
+                            $listingVendorId = (int) ($message->vendor_id ?: optional($message->listing)->vendor_id ?? 0);
+                            $canEmailVendor = $listingVendorId > 0;
                           @endphp
 
                           <td class="title">
@@ -100,6 +102,23 @@
                                 <i class="fas fa-eye"></i>
                               </span>
                             </a>
+
+                            <form
+                              action="{{ route('admin.listing.message.notify_vendor') }}"
+                              method="post"
+                              class="d-inline-block"
+                              onsubmit="return confirm(@json(__('Send this enquiry to the vendor by email?')));">
+                              @csrf
+                              <input type="hidden" name="message_id" value="{{ $message->id }}">
+                              <input type="hidden" name="language" value="{{ $language->code }}">
+                              <button type="submit"
+                                class="btn btn-info btn-sm mt-1 mr-1"
+                                @unless ($canEmailVendor) disabled title="{{ __('No vendor for this listing (admin listing)') }}" @endunless>
+                                <span class="btn-label">
+                                  <i class="fas fa-envelope"></i>
+                                </span>
+                              </button>
+                            </form>
 
                             <form class="deleteForm d-inline-block"
                               action="{{ route('admin.listing.message.delete_message') }}"method="post">

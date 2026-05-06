@@ -606,13 +606,17 @@
                                             </h6>
                                         </a>
                                         @if ($vendor->show_phone_number == 1)
-                                            @if (!is_null($vendor->phone))
-                                                <a href="tel:{{ $vendor->phone }}">{{ $vendor->phone }}</a>
-                                            @endif
+                                            <div class="d-none" aria-hidden="true">
+                                                @if (!is_null($vendor->phone))
+                                                    <a href="tel:{{ $vendor->phone }}">{{ $vendor->phone }}</a>
+                                                @endif
+                                            </div>
                                         @endif
                                         <br>
                                         @if ($vendor->show_email_addresss == 1)
-                                            <a href="mailto:{{ $vendor->to_mail }}">{{ $vendor->to_mail }}</a>
+                                            <div class="d-none" aria-hidden="true">
+                                                <a href="mailto:{{ $vendor->to_mail }}">{{ $vendor->to_mail }}</a>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -655,7 +659,7 @@
                             </div>
                         @endif
 
-                        <div class="widget widget-address radius-md mb-30">
+                        <div class="widget widget-address radius-md mb-30 d-none" aria-hidden="true">
                             <h5 class="title">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#amenities" aria-expanded="true" aria-controls="amenities">

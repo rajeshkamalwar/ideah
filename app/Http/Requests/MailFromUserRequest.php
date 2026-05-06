@@ -28,7 +28,7 @@ class MailFromUserRequest extends FormRequest
 
     return [
       'name' => 'required',
-      'email' => 'required|email:rfc,dns',
+      'email' => 'required|email',
       'subject' => 'required',
       'message' => 'required',
       'g-recaptcha-response' => $info->google_recaptcha_status == 1 ? 'required|captcha' : ''

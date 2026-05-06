@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Api\ApiHelper\HelperController;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\AdminNotificationEmails;
 use App\Http\Controllers\FrontEnd\MiscellaneousController;
 use App\Http\Helpers\GeoSearch;
 use App\Http\Helpers\ListingVisibility;
@@ -861,7 +862,7 @@ class ListingController extends Controller
             }
             try {
                 $data = [
-                    'to' => $send_email_address,
+                    'to' => AdminNotificationEmails::parseList($send_email_address),
                     'subject' => $subject,
                     'body' => $body,
                 ];
@@ -1064,7 +1065,7 @@ class ListingController extends Controller
         if ($request->vendor_id) {
             $vendor = Vendor::where('id', $request->vendor_id)->select('to_mail', 'email', 'username')->first();
             if ($vendor) {
-                $send_email_address = "azimahmed11041@fmail.com";
+                $send_email_address = $vendor->to_mail ?: $vendor->email ?: $send_email_address;
                 $user_name = $vendor->username ?: $user_name;
             }
         }
@@ -1104,7 +1105,7 @@ class ListingController extends Controller
 
             try {
                 Mail::send([], [], function ($message) use ($send_email_address, $body, $be, $product_title) {
-                    $message->to($send_email_address)
+                    $message->to(AdminNotificationEmails::parseList($send_email_address))
                         ->subject('Inquiry about ' . $product_title)
                         ->from($be->from_mail, $be->from_name)
                         ->html($body);

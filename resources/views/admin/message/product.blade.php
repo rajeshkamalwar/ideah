@@ -95,6 +95,8 @@
                                                                 }
                                                             }
                                                         }
+                                                        $productVendorId = (int) ($message->vendor_id ?: optional($product)->vendor_id ?? 0);
+                                                        $canEmailVendor = $productVendorId > 0;
                                                     @endphp
                                                     <td class="title">
                                                         @if (!empty($listing_content))
@@ -124,6 +126,23 @@
                                                     <a class="btn btn-secondary btn-sm mt-1 mr-1" href="{{ route('admin.product.message.details', $message->id) }}" target="_blank">
                                                     <span class="btn-label"><i class="fas fa-eye"></i></span>
                                                     </a>
+
+                                                    <form
+                                                      action="{{ route('admin.product.message.notify_vendor') }}"
+                                                      method="post"
+                                                      class="d-inline-block"
+                                                      onsubmit="return confirm(@json(__('Send this enquiry to the vendor by email?')));">
+                                                      @csrf
+                                                      <input type="hidden" name="message_id" value="{{ $message->id }}">
+                                                      <input type="hidden" name="language" value="{{ $language->code }}">
+                                                      <button type="submit"
+                                                        class="btn btn-info btn-sm mt-1 mr-1"
+                                                        @unless ($canEmailVendor) disabled title="{{ __('No vendor linked to this product') }}" @endunless>
+                                                        <span class="btn-label">
+                                                          <i class="fas fa-envelope"></i>
+                                                        </span>
+                                                      </button>
+                                                    </form>
 
                                                         <form class="deleteForm d-inline-block"
                                                             action="{{ route('admin.product.message.delete_message') }}"

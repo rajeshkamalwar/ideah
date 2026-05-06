@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin\BasicSettings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\AdminNotificationEmails;
+use App\Models\BasicSettings\Basic;
 use Illuminate\Http\Request;
 use App\Http\Helpers\UploadFile;
 use App\Http\Requests\CurrencyRequest;
@@ -12,12 +14,15 @@ use App\Models\Language;
 use App\Models\Timezone;
 use App\Rules\ImageMimeTypeRule;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Mews\Purifier\Facades\Purifier;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Mail\Message;
 
 class BasicController extends Controller
 {
@@ -292,32 +297,108 @@ class BasicController extends Controller
     public function mailToAdmin()
     {
         $data = DB::table('basic_settings')->select('to_mail')->first();
+        $to_mail_display = AdminNotificationEmails::formatForForm($data->to_mail ?? null);
 
-        return view('admin.basic-settings.email.mail-to-admin', ['data' => $data]);
+        return view('admin.basic-settings.email.mail-to-admin', [
+            'data' => $data,
+            'to_mail_display' => $to_mail_display,
+        ]);
     }
 
     public function updateMailToAdmin(Request $request)
     {
-        $rule = [
-            'to_mail' => 'required'
-        ];
+        $validator = Validator::make($request->all(), [
+            'to_mail' => 'required|string',
+        ], [
+            'to_mail.required' => __('Enter at least one admin email address.'),
+        ]);
 
-        $message = [
-            'to_mail.required' => 'The mail address field is required.'
-        ];
-
-        $validator = Validator::make($request->all(), $rule, $message);
+        $validator->after(function ($validator) use ($request) {
+            if (AdminNotificationEmails::parseList($request->input('to_mail', '')) === []) {
+                $validator->errors()->add(
+                    'to_mail',
+                    __('Enter at least one valid email address. You can add several—separate them with commas or put one per line.')
+                );
+            }
+        });
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator->errors());
+            return redirect()->back()->withErrors($validator->errors())->withInput();
         }
+
+        $normalized = AdminNotificationEmails::normalizeToStorage($request->input('to_mail', ''));
 
         DB::table('basic_settings')->updateOrInsert(
             ['uniqid' => 12345],
-            ['to_mail' => $request->to_mail]
+            ['to_mail' => $normalized]
         );
 
         Session::flash('success', __('Mail info updated successfully') . '!');
+
+        return redirect()->back();
+    }
+
+    public function testMailToAdmin(Request $request)
+    {
+        $request->validate([
+            'test_recipient' => 'nullable|email',
+        ]);
+
+        $info = Basic::query()
+            ->select('website_title', 'smtp_status', 'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name', 'to_mail')
+            ->first();
+
+        if ($request->filled('test_recipient')) {
+            $recipients = [$request->input('test_recipient')];
+        } else {
+            $recipients = AdminNotificationEmails::parseList($info->to_mail);
+        }
+
+        if ($recipients === []) {
+            Session::flash('error', __('Save at least one admin email address above, or enter a recipient for the test.'));
+
+            return redirect()->back();
+        }
+
+        if ((int) $info->smtp_status !== 1) {
+            Session::flash('error', __('SMTP is disabled. Enable and configure it under Mail From Admin, then try again.'));
+
+            return redirect()->back();
+        }
+
+        try {
+            Config::set('mail.mailers.smtp', [
+                'transport' => 'smtp',
+                'host' => $info->smtp_host,
+                'port' => $info->smtp_port,
+                'encryption' => $info->encryption,
+                'username' => $info->smtp_username,
+                'password' => $info->smtp_password,
+                'timeout' => null,
+                'auth_mode' => null,
+            ]);
+        } catch (\Throwable $e) {
+            Session::flash('error', $e->getMessage());
+
+            return redirect()->back();
+        }
+
+        $siteTitle = $info->website_title ?: config('app.name');
+        $subject = '[' . $siteTitle . '] ' . __('Test email');
+        $body = '<p>' . e(__('This is a test message from your site mail settings.')) . '</p>'
+            . '<p>' . e(__('Sent at')) . ': ' . e(now()->toDateTimeString()) . '</p>';
+
+        try {
+            Mail::send([], [], function (Message $message) use ($info, $recipients, $subject, $body) {
+                $message->to($recipients)
+                    ->subject($subject)
+                    ->from($info->from_mail, $info->from_name)
+                    ->html($body, 'text/html');
+            });
+            Session::flash('success', __('Test email sent to: :emails', ['emails' => implode(', ', $recipients)]));
+        } catch (\Throwable $e) {
+            Session::flash('error', __('Could not send test email: :message', ['message' => $e->getMessage()]));
+        }
 
         return redirect()->back();
     }

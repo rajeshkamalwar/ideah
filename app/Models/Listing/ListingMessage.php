@@ -21,4 +21,9 @@ class ListingMessage extends Model
     {
         return $this->belongsTo(Vendor::class);
     }
+
+    public function listing()
+    {
+        return $this->belongsTo(Listing::class, 'listing_id');
+    }
 }

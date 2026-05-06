@@ -352,6 +352,46 @@
                                                 class="form-text text-muted">{{ __('If set, this package’s limits and features apply to this listing instead of the vendor’s current plan.') }}</small>
                                         </div>
                                     </div>
+
+                                    @isset($listingVendor)
+                                        @if ($listingVendor)
+                                            <div class="col-lg-12">
+                                                <div class="card border mt-1 mb-3">
+                                                    <div class="card-header py-2">
+                                                        <strong>{{ __('Vendor login') }}</strong>
+                                                    </div>
+                                                    <div class="card-body pb-2">
+                                                        <div class="row align-items-end">
+                                                            <div class="col-md-4">
+                                                                <label>{{ __('Username') }}</label>
+                                                                <input type="text" class="form-control" readonly
+                                                                    value="{{ $listingVendor->username }}">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label>{{ __('Password') }}</label>
+                                                                <input type="text" class="form-control font-monospace"
+                                                                    readonly
+                                                                    value="••••••••••••"
+                                                                    title="{{ __('Actual password cannot be shown (stored encrypted)') }}">
+                                                                <small
+                                                                    class="form-text text-muted">{{ __('The real password is not stored in plain text and cannot be displayed. Use “Change password” to set a new one.') }}</small>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <a href="{{ route('admin.edit_management.vendor_edit', $listingVendor->id) }}"
+                                                                    class="btn btn-outline-primary btn-sm mr-1 mb-1"
+                                                                    target="_blank"
+                                                                    rel="noopener">{{ __('Edit vendor') }}</a>
+                                                                <a href="{{ route('admin.vendor_management.vendor.change_password', $listingVendor->id) }}"
+                                                                    class="btn btn-outline-secondary btn-sm mb-1"
+                                                                    target="_blank"
+                                                                    rel="noopener">{{ __('Change password') }}</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endisset
                                 </div>
 
                                 <div id="accordion" class="mt-3">

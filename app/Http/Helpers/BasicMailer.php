@@ -3,7 +3,7 @@
 namespace App\Http\Helpers;
 
 use App\Models\BasicSettings\Basic;
-use Config;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
@@ -38,10 +38,21 @@ class BasicMailer
 
     if ($info->smtp_status == 1) {
       try {
-        Mail::send([], [], function (Message $message) use ($data, $info) {
+        $recipients = $data['recipient'];
+        if (is_string($recipients)) {
+          $recipients = AdminNotificationEmails::parseList($recipients);
+        }
+        if (! is_array($recipients)) {
+          $recipients = [$recipients];
+        }
+        if ($recipients === []) {
+          return;
+        }
+
+        Mail::send([], [], function (Message $message) use ($data, $info, $recipients) {
           $fromMail = $info->from_mail;
           $fromName = $info->from_name;
-          $message->to($data['recipient'])
+          $message->to($recipients)
             ->subject($data['subject'])
             ->from($fromMail, $fromName)
             ->html($data['body'], 'text/html');

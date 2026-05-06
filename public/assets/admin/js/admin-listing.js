@@ -227,136 +227,145 @@ $('body').on('change', '.stateDropDown', function () {
 
 
 $(document).ready(function () {
-  $('.js-example-basic-single2').select2({
-    placeholder: 'Select Category',
-    minimumInputLength: 0,
-    ajax: {
-      url: getHomeCatUrl,
-      dataType: 'json',
-      delay: 250,
-      data: function (params) {
-        var dataCode = $(this).data('code');
-        return {
-          search: params.term || '',
-          page: params.page || 1,
-          lang: dataCode
-        };
-      },
-      processResults: function (data, params) {
-        return {
-          results: data.results.map(function (item) {
-            return {
-              text: item.name,
-              id: item.id
-            };
-          }),
-          pagination: {
-            more: data.more
-          }
-        };
-      },
-      cache: true
-    }
-  });
+  // Listing create/edit inject these URLs; other pages that include this file do not.
+  if (typeof getHomeCatUrl !== 'undefined') {
+    $('.js-example-basic-single2').select2({
+      placeholder: 'Select Category',
+      minimumInputLength: 0,
+      ajax: {
+        url: getHomeCatUrl,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          var dataCode = $(this).data('code');
+          return {
+            search: params.term || '',
+            page: params.page || 1,
+            lang: dataCode
+          };
+        },
+        processResults: function (data, params) {
+          return {
+            results: data.results.map(function (item) {
+              return {
+                text: item.name,
+                id: item.id
+              };
+            }),
+            pagination: {
+              more: data.more
+            }
+          };
+        },
+        cache: true
+      }
+    });
+  }
 
-  $('.js-select-city-ajax').select2({
-    placeholder: 'Select City',
-    allowClear: true,
-    minimumInputLength: 0,
-    ajax: {
-      url: cityUrl,
-      dataType: 'json',
-      delay: 250,
-      data: function (params) {
-        var dataCode = $(this).data('code');
-        return {
-          search: params.term || '',
-          page: params.page || 1,
-          lang: dataCode
-        };
-      },
-      processResults: function (data, params) {
-        return {
-          results: data.results.map(function (item) {
-            return {
-              text: item.name,
-              id: item.id
-            };
-          }),
-          pagination: {
-            more: data.more
-          }
-        };
-      },
-      cache: true
-    }
-  });
+  if (typeof cityUrl !== 'undefined') {
+    $('.js-select-city-ajax').select2({
+      placeholder: 'Select City',
+      allowClear: true,
+      minimumInputLength: 0,
+      ajax: {
+        url: cityUrl,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          var dataCode = $(this).data('code');
+          return {
+            search: params.term || '',
+            page: params.page || 1,
+            lang: dataCode
+          };
+        },
+        processResults: function (data, params) {
+          return {
+            results: data.results.map(function (item) {
+              return {
+                text: item.name,
+                id: item.id
+              };
+            }),
+            pagination: {
+              more: data.more
+            }
+          };
+        },
+        cache: true
+      }
+    });
+  }
 
-  $('.js-state-basic').select2({
-    placeholder: 'Select State',
-    allowClear: true,
-    minimumInputLength: 0,
-    ajax: {
-      url: stateUrl,
-      dataType: 'json',
-      delay: 250,
-      data: function (params) {
-        var dataCode = $(this).data('code');
-        return {
-          search: params.term || '',
-          page: params.page || 1,
-          lang: dataCode
-        };
-      },
-      processResults: function (data, params) {
-        return {
-          results: data.results.map(function (item) {
-            return {
-              text: item.name,
-              id: item.id
-            };
-          }),
-          pagination: {
-            more: data.more
-          }
-        };
-      },
-      cache: true
-    }
-  });
+  if (typeof stateUrl !== 'undefined') {
+    $('.js-state-basic').select2({
+      placeholder: 'Select State',
+      allowClear: true,
+      minimumInputLength: 0,
+      ajax: {
+        url: stateUrl,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          var dataCode = $(this).data('code');
+          return {
+            search: params.term || '',
+            page: params.page || 1,
+            lang: dataCode
+          };
+        },
+        processResults: function (data, params) {
+          return {
+            results: data.results.map(function (item) {
+              return {
+                text: item.name,
+                id: item.id
+              };
+            }),
+            pagination: {
+              more: data.more
+            }
+          };
+        },
+        cache: true
+      }
+    });
+  }
 
-  $('.js-country-basic').select2({
-    placeholder: 'Select Country',
-    allowClear: true,
-    minimumInputLength: 0,
-    ajax: {
-      url: countryUrl,
-      dataType: 'json',
-      delay: 250,
-      data: function (params) {
-        var dataCode = $(this).data('code');
-        return {
-          search: params.term || '',
-          page: params.page || 1,
-          lang: dataCode
-        };
-      },
-      processResults: function (data, params) {
-        return {
-          results: data.results.map(function (item) {
-            return {
-              text: item.name,
-              id: item.id
-            };
-          }),
-          pagination: {
-            more: data.more
-          }
-        };
-      },
-      cache: true
-    }
-  });
+  if (typeof countryUrl !== 'undefined') {
+    $('.js-country-basic').select2({
+      placeholder: 'Select Country',
+      allowClear: true,
+      minimumInputLength: 0,
+      ajax: {
+        url: countryUrl,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          var dataCode = $(this).data('code');
+          return {
+            search: params.term || '',
+            page: params.page || 1,
+            lang: dataCode
+          };
+        },
+        processResults: function (data, params) {
+          return {
+            results: data.results.map(function (item) {
+              return {
+                text: item.name,
+                id: item.id
+              };
+            }),
+            pagination: {
+              more: data.more
+            }
+          };
+        },
+        cache: true
+      }
+    });
+  }
 });
 
 

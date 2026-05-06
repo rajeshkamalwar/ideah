@@ -150,7 +150,7 @@ class MegaMailer
         Mail::send([], [], function (Message $message) use ($data, $be) {
           $fromMail = $be->from_mail;
           $fromName = $be->from_name;
-          $message->to($be->to_mail)
+          $message->to(AdminNotificationEmails::parseList($be->to_mail))
             ->subject($data['subject'])
             ->from($fromMail, $fromName)
             ->html($data['body'], 'text/html');
