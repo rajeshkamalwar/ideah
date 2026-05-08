@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\UploadFile;
 use App\Jobs\SendBulkEmailJob;
 use App\Models\BulkEmailCampaign;
 use App\Models\Subscriber;
@@ -77,6 +78,25 @@ class BulkEmailController extends Controller
         return response()->json(array_values($list));
     }
 
+    public function uploadImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:5120',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first('image'),
+            ], 422);
+        }
+
+        $imageName = UploadFile::store(public_path('assets/img/bulk-email/'), $request->file('image'));
+
+        return response()->json([
+            'location' => asset('assets/img/bulk-email/' . $imageName),
+        ]);
+    }
+
     public function send(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -105,6 +125,7 @@ class BulkEmailController extends Controller
             'audience'         => $request->audience,
             'total_recipients' => count($recipients),
             'sent_count'       => 0,
+            'failed_count'     => 0,
             'status'           => 'queued',
         ]);
 
@@ -148,6 +169,7 @@ class BulkEmailController extends Controller
             'audience'         => $request->audience,
             'total_recipients' => count($recipients),
             'sent_count'       => 0,
+            'failed_count'     => 0,
             'status'           => 'queued',
             'scheduled_at'     => $scheduledAt,
         ]);
@@ -183,11 +205,11 @@ class BulkEmailController extends Controller
             // If the field was explicitly submitted (even as empty array),
             // honour it — don't silently fall back to the full audience.
             if (is_array($decoded)) {
-                return array_values(array_unique(array_filter($decoded)));
+                return $this->sanitizeEmails($decoded);
             }
         }
 
-        return $this->collectRecipients($request->audience);
+        return $this->sanitizeEmails($this->collectRecipients($request->audience));
     }
 
     /**
@@ -210,5 +232,25 @@ class BulkEmailController extends Controller
         }
 
         return array_values(array_unique(array_filter($emails)));
+    }
+
+    private function sanitizeEmails(array $emails): array
+    {
+        $clean = [];
+
+        foreach ($emails as $email) {
+            if (!is_string($email)) {
+                continue;
+            }
+
+            $email = trim($email);
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                continue;
+            }
+
+            $clean[] = strtolower($email);
+        }
+
+        return array_values(array_unique($clean));
     }
 }

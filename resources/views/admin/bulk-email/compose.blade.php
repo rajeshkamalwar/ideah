@@ -226,8 +226,11 @@
 
   var recipientsData = [];
   var recipientsUrl  = "{{ route('admin.bulk_email.recipients') }}";
+  var uploadImageUrl = "{{ route('admin.bulk_email.upload_image') }}";
   var sendRoute      = "{{ route('admin.bulk_email.send') }}";
   var scheduleRoute  = "{{ route('admin.bulk_email.schedule') }}";
+  var uploadInvalidText = @json(__('Image upload failed. Invalid server response.'));
+  var uploadFailedText  = @json(__('Image upload failed. Please try again.'));
 
   // Called from onclick="" on audience cards — jQuery is guaranteed loaded here
   function toggleAudience(id) {
@@ -237,6 +240,65 @@
   }
 
   $(document).ready(function () {
+    function initBulkEmailEditor() {
+      if (typeof tinymce === 'undefined') {
+        return;
+      }
+
+      var existing = tinymce.get('bulkEmailBody');
+      if (existing) {
+        existing.remove();
+      }
+
+      tinymce.init({
+        selector: '#bulkEmailBody',
+        plugins: 'autolink charmap emoticons image link lists media searchreplace table visualblocks wordcount directionality',
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat | ltr rtl',
+        promotion: false,
+        automatic_uploads: true,
+        images_file_types: 'jpg,jpeg,png,gif,webp',
+        images_upload_handler: function (blobInfo, progress) {
+          return new Promise(function (resolve, reject) {
+            var formData = new FormData();
+            formData.append('image', blobInfo.blob(), blobInfo.filename());
+
+            $.ajax({
+              url: uploadImageUrl,
+              method: 'POST',
+              data: formData,
+              processData: false,
+              contentType: false,
+              xhr: function () {
+                var xhr = $.ajaxSettings.xhr();
+                if (xhr.upload) {
+                  xhr.upload.onprogress = function (e) {
+                    if (e.lengthComputable && typeof progress === 'function') {
+                      progress((e.loaded / e.total) * 100);
+                    }
+                  };
+                }
+                return xhr;
+              },
+              success: function (response) {
+                if (response && response.location) {
+                  resolve(response.location);
+                } else {
+                  reject(uploadInvalidText);
+                }
+              },
+              error: function (xhr) {
+                var message = (xhr.responseJSON && xhr.responseJSON.message)
+                  ? xhr.responseJSON.message
+                  : uploadFailedText;
+                reject(message);
+              }
+            });
+          });
+        }
+      });
+    }
+
+    initBulkEmailEditor();
 
     /* ── Audience card styling + AJAX load ── */
     function onAudienceChange() {

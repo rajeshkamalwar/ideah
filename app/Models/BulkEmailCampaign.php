@@ -15,6 +15,7 @@ class BulkEmailCampaign extends Model
         'audience',
         'total_recipients',
         'sent_count',
+        'failed_count',
         'status',
         'scheduled_at',
     ];

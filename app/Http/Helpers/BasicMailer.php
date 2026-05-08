@@ -36,40 +36,38 @@ class BasicMailer
       }
     }
 
-    if ($info->smtp_status == 1) {
-      try {
-        $recipients = $data['recipient'];
-        if (is_string($recipients)) {
-          $recipients = AdminNotificationEmails::parseList($recipients);
-        }
-        if (! is_array($recipients)) {
-          $recipients = [$recipients];
-        }
-        if ($recipients === []) {
-          return;
-        }
-
-        Mail::send([], [], function (Message $message) use ($data, $info, $recipients) {
-          $fromMail = $info->from_mail;
-          $fromName = $info->from_name;
-          $message->to($recipients)
-            ->subject($data['subject'])
-            ->from($fromMail, $fromName)
-            ->html($data['body'], 'text/html');
-
-          if (array_key_exists('invoice', $data)) {
-            $message->attach($data['invoice'], [
-              'as' => 'Invoice',
-              'mime' => 'application/pdf',
-            ]);
-          }
-        });
-        if (array_key_exists('sessionMessage', $data)) {
-          Session::flash('success', $data['sessionMessage']);
-        }
-      } catch (\Exception $e) {
-        Session::flash('warning', 'Mail could not be sent. Mailer Error: ' . $e);
+    try {
+      $recipients = $data['recipient'];
+      if (is_string($recipients)) {
+        $recipients = AdminNotificationEmails::parseList($recipients);
       }
+      if (! is_array($recipients)) {
+        $recipients = [$recipients];
+      }
+      if ($recipients === []) {
+        return;
+      }
+
+      Mail::send([], [], function (Message $message) use ($data, $info, $recipients) {
+        $fromMail = $info->from_mail;
+        $fromName = $info->from_name;
+        $message->to($recipients)
+          ->subject($data['subject'])
+          ->from($fromMail, $fromName)
+          ->html($data['body'], 'text/html');
+
+        if (array_key_exists('invoice', $data)) {
+          $message->attach($data['invoice'], [
+            'as' => 'Invoice',
+            'mime' => 'application/pdf',
+          ]);
+        }
+      });
+      if (array_key_exists('sessionMessage', $data)) {
+        Session::flash('success', $data['sessionMessage']);
+      }
+    } catch (\Exception $e) {
+      Session::flash('warning', 'Mail could not be sent. Mailer Error: ' . $e);
     }
     return;
   }

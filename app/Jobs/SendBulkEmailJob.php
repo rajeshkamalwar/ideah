@@ -32,11 +32,8 @@ class SendBulkEmailJob implements ShouldQueue
         if (!$campaign) {
             return;
         }
-
-        $info = \App\Models\BasicSettings\Basic::select('smtp_status')->first();
-
-        if (!$info || $info->smtp_status != 1) {
-            return;
+        if ($campaign->status === 'queued') {
+            $campaign->update(['status' => 'sending']);
         }
 
         $mailData = [
@@ -48,18 +45,35 @@ class SendBulkEmailJob implements ShouldQueue
         BasicMailer::sendMail($mailData);
 
         $campaign->increment('sent_count');
-
-        if ($campaign->fresh()->sent_count >= $campaign->total_recipients) {
-            $campaign->update(['status' => 'completed']);
-        }
+        $this->finalizeCampaign();
     }
 
     public function failed(\Throwable $exception): void
     {
         $campaign = BulkEmailCampaign::find($this->campaignId);
 
-        if ($campaign && $campaign->status !== 'completed') {
-            $campaign->update(['status' => 'failed']);
+        if (!$campaign) {
+            return;
+        }
+
+        $campaign->increment('failed_count');
+        $this->finalizeCampaign();
+    }
+
+    private function finalizeCampaign(): void
+    {
+        $campaign = BulkEmailCampaign::find($this->campaignId);
+        if (!$campaign) {
+            return;
+        }
+
+        $failedCount = (int) ($campaign->failed_count ?? 0);
+        $processed = (int) $campaign->sent_count + $failedCount;
+
+        if ($processed >= (int) $campaign->total_recipients) {
+            $campaign->update([
+                'status' => $failedCount > 0 ? 'completed_error' : 'completed',
+            ]);
         }
     }
 }

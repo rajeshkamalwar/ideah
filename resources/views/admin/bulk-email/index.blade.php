@@ -65,10 +65,11 @@
                       @foreach ($campaigns as $campaign)
                         @php
                           $pct = $campaign->total_recipients > 0
-                            ? round(($campaign->sent_count / $campaign->total_recipients) * 100)
+                            ? round((($campaign->sent_count + ($campaign->failed_count ?? 0)) / $campaign->total_recipients) * 100)
                             : 0;
                           $barClass = $campaign->status === 'completed' ? 'bg-success'
-                            : ($campaign->status === 'failed' ? 'bg-danger' : 'bg-primary');
+                            : ($campaign->status === 'completed_error' ? 'bg-warning'
+                            : ($campaign->status === 'failed' ? 'bg-danger' : 'bg-primary'));
                         @endphp
                         <tr>
                           <td>{{ $loop->iteration + ($campaigns->currentPage() - 1) * $campaigns->perPage() }}</td>
@@ -98,13 +99,23 @@
                                 aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100">
                               </div>
                             </div>
-                            <small class="text-muted">{{ $campaign->sent_count }}&nbsp;/&nbsp;{{ $campaign->total_recipients }}</small>
+                            <small class="text-muted">
+                              {{ __('Sent') }}: {{ $campaign->sent_count }}
+                              @if (($campaign->failed_count ?? 0) > 0)
+                                | {{ __('Failed') }}: {{ $campaign->failed_count }}
+                              @endif
+                              | {{ __('Total') }}: {{ $campaign->total_recipients }}
+                            </small>
                           </td>
                           <td>
                             @if ($campaign->status === 'completed')
                               <span class="badge badge-success">{{ __('Completed') }}</span>
+                            @elseif ($campaign->status === 'completed_error')
+                              <span class="badge badge-warning">{{ __('Completed with errors') }}</span>
                             @elseif ($campaign->status === 'failed')
                               <span class="badge badge-danger">{{ __('Failed') }}</span>
+                            @elseif ($campaign->status === 'sending')
+                              <span class="badge badge-primary">{{ __('Sending') }}</span>
                             @elseif ($campaign->status === 'queued')
                               <span class="badge badge-warning">{{ __('Queued') }}</span>
                             @else
