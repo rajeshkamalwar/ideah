@@ -381,7 +381,7 @@ Route::prefix('/admin')->middleware('auth:admin', 'Demo', 'adminLang')->group(fu
 
         Route::post('/update-product/{id}', 'Admin\Shop\ProductController@update')->name('admin.shop_management.update_product');
 
-        Route::post('/product/{id}/download', 'Admin\Shop\ProductController@downloadProduct')->name('user.product_order.product.download');
+        Route::post('/product/{id}/download', 'Admin\Shop\ProductController@downloadProduct')->name('admin.shop_management.download_product');
 
         Route::post('/delete-product/{id}', 'Admin\Shop\ProductController@destroy')->name('admin.shop_management.delete_product');
 
